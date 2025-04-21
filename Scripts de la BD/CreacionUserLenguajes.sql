@@ -14,5 +14,6 @@ GRANT CREATE TRIGGER TO CreacionObjetos;
 GRANT CREATE SEQUENCE TO CreacionObjetos;
 
 
+
 Grant CreacionObjetos to ProyectoLenguajes;
-Grant CreacionObjetos to ProyectoAdmin;
+GRANT CREATE VIEW TO ProyectoLenguajes;

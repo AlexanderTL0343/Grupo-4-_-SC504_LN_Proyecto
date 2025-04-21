@@ -7,10 +7,10 @@ Creacion De entidades para la BD del proyecto
 Create Table FIDE_Estado_TB(
 ID_Estado number CONSTRAINT FIDE_Estado_TB_ID_Estado_PK primary key not null,
 Descripcion Varchar2(100) not null,
-Fecha_modificacion Timestamp Not null,
+Fecha_modificacion Timestamp ,
 Creado_Por Varchar2(100) not null,
 Fecha_Creacion Timestamp not null,
-Ultima_Actualizacion_Por Varchar2(100) not null,
+Ultima_Actualizacion_Por Varchar2(100),
 Accion Varchar2(100) not null
 );
 
@@ -256,8 +256,8 @@ Constraint FIDE_Promociones_TB_ID_Estado_FK foreign key (ID_Estado_FK) reference
 /
 
 Create Table FIDE_HistorialProducto_TB(
+ID_HistorialProducto NUMBER CONSTRAINT Fide_HistorialProducto_TB_ID_HistorialProducto_PK primary key not null,
 ID_Producto_FK number Not Null,
-ID_Historial_FK number Not Null,
 Cantidad number Not Null,
 ID_Estado_FK number Not Null,
 Fecha_modificacion Timestamp Not null,
@@ -397,4 +397,40 @@ Accion Varchar2(100) not Null,
 Constraint Fide_Claves_TB_ID_Estado_FK foreign key (ID_Estado_FK) references FIDE_Estado_TB(ID_Estado)
 );
 
+CREATE TABLE FIDE_USUARIOS_UNIFICADOS_TB AS 
+SELECT * FROM (
+    SELECT 
+        ID_Colaborador AS USER_ID, 
+        CEDULA AS CEDULA,
+        Nombre_COLABORADOR AS NAME, 
+        PRIMER_APELLIDO_COLABORADOR AS LAST_NAME, 
+        SEGUNDO_APELLIDO_COLABORADOR AS SECOND_LAST_NAME, 
+        CORREO_COLABORADOR AS EMAIL, 
+        TELEFONO_COLABORADOR AS PHONE, 
+        ID_ROL_FK AS ROL, 
+        CLAVE_COLABORADOR AS PASSWORD,
+        ID_ESTADO_FK AS ESTADO, 
+        USACLAVETEMP AS USACLAVETEMP,
+        VIGENCIA AS VIGENCIA,
+        'Colaborador' AS UserType 
+    FROM FIDE_Colaboradores_TB
+
+    UNION ALL
+
+    SELECT 
+        ID_Cliente AS USER_ID, 
+        CEDULA AS CEDULA,
+        NOMBRE_CLIENTE AS NAME, 
+        PRIMER_APELLIDO_CLIENTE AS LAST_NAME, 
+        SEGUNDO_APELLIDO_CLIENTE AS SECOND_LAST_NAME, 
+        CORREO_CLIENTE AS EMAIL,
+        TELEFONO_CLIENTE AS PHONE,
+        NULL AS ROL,
+        CLAVE_CLIENTE AS PASSWORD,
+        ID_ESTADO_FK AS ESTADO, 
+        USACLAVETEMP AS USACLAVETEMP,
+        VIGENCIA AS VIGENCIA,
+        'Cliente' AS UserType 
+    FROM FIDE_Clientes_TB
+);
 /

@@ -1,0 +1,54 @@
+CREATE OR REPLACE  TRIGGER "Fide_UPDATE_USUARIOSUNIFICADOS_TRG" 
+INSTEAD OF UPDATE ON FIDE_USUARIOS_UNIFICADOS_VW
+FOR EACH ROW
+BEGIN
+    -- Update Colaboradores Table
+    IF :OLD.UserType = 'Colaborador' THEN
+        UPDATE FIDE_Colaboradores_TB
+        SET CLAVE_COLABORADOR = :NEW.PASSWORD
+        WHERE ID_Colaborador = :OLD.USER_ID;
+
+    -- Update Clientes Table
+    ELSIF :OLD.UserType = 'Cliente' THEN
+        UPDATE FIDE_Clientes_TB
+        SET CLAVE_CLIENTE = :NEW.PASSWORD
+        WHERE ID_Cliente = :OLD.USER_ID;
+    END IF;
+END;
+
+///////////////////////////
+
+CREATE OR REPLACE TRIGGER FIDE_USUARIOS_UNIFICADOS_TB_TRG
+INSTEAD OF INSERT ON FIDE_USUARIOS_UNIFICADOS_VW
+FOR EACH ROW
+BEGIN
+    INSERT INTO FIDE_USUARIOS_UNIFICADOS_TB (
+        USER_ID,
+        CEDULA,
+        NAME,
+        LAST_NAME,
+        SECOND_LAST_NAME,
+        EMAIL,
+        PHONE,
+        ROL,
+        PASSWORD,
+        ESTADO,
+        USACLAVETEMP,
+        VIGENCIA,
+        UserType
+    ) VALUES (
+        :NEW.USER_ID,
+        :NEW.CEDULA,
+        :NEW.NAME,
+        :NEW.LAST_NAME,
+        :NEW.SECOND_LAST_NAME,
+        :NEW.EMAIL,
+        :NEW.PHONE,
+        :NEW.ROL,
+        :NEW.PASSWORD,
+        :NEW.ESTADO,
+        :NEW.USACLAVETEMP,
+        :NEW.VIGENCIA,
+        :NEW.UserType
+    );
+END;
