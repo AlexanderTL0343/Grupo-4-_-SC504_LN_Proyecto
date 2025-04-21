@@ -1291,11 +1291,11 @@ BEGIN
     WHERE ID_PRODUCTO_fK = p_IdProducto;
 
 
-    -- Validamos si se actualiz� alg�n registro
+    -- Validamos si se actualiz  alg n registro
     IF SQL%ROWCOUNT > 0 THEN
-        p_Resultado := 0;  -- �xito
+        p_Resultado := 0;  --  xito
     ELSE
-        p_Resultado := -2; -- No se encontr� el producto
+        p_Resultado := -2; -- No se encontr  el producto
     END IF;
 
     COMMIT;
@@ -1422,37 +1422,50 @@ BEGIN
 END FIDE_ConsultarCliente_SP;
 
 PROCEDURE FIDE_ActualizarPerfil_SP(
-    p_Identificacion NUMBER,
-    p_Cedula        VARCHAR2,
-    p_Nombre        VARCHAR2,
-    p_Correo        VARCHAR2,
-    p_IdRol         NUMBER
+    p_Identificacion VARCHAR2,
+    p_Cedula         VARCHAR2,
+    p_Nombre         VARCHAR2,
+    p_Correo         VARCHAR2,
+    p_IdRol          NUMBER
 ) AS
     v_count NUMBER;
 BEGIN
-   
-    SELECT COUNT(*) INTO v_count
-    FROM FIDE_USUARIOS_UNIFICADOS_TB
-    WHERE (CEDULA = p_Cedula OR EMAIL = p_Correo)
-      AND USER_ID != p_Identificacion;
+    DBMS_OUTPUT.PUT_LINE('--- INICIO DE PROCEDIMIENTO ---');
+    DBMS_OUTPUT.PUT_LINE('Identificación: ' || p_Identificacion);
+    DBMS_OUTPUT.PUT_LINE('Cédula: ' || p_Cedula);
+    DBMS_OUTPUT.PUT_LINE('Nombre: ' || p_Nombre);
+    DBMS_OUTPUT.PUT_LINE('Correo: ' || p_Correo);
+    DBMS_OUTPUT.PUT_LINE('Rol: ' || p_IdRol);
 
-  
+    -- Verifica si el correo o la cédula están en otro usuario (no este)
+    SELECT COUNT(*) INTO v_count
+    FROM FIDE_CLIENTES_TB
+    WHERE (CORREO_CLIENTE = p_Correo OR Cedula = p_Cedula)
+      AND ID_CLIENTE != p_Identificacion;
+
+    DBMS_OUTPUT.PUT_LINE('Usuarios con mismo correo/cédula (distinto ID): ' || v_count);
+
+    -- Si NO están repetidos por otro, se permite actualizar
     IF v_count = 0 THEN
-        UPDATE FIDE_USUARIOS_UNIFICADOS_TB
+        UPDATE FIDE_USUARIOS_UNIFICADOS_VW
         SET CEDULA = p_Cedula,
             NAME = p_Nombre,
             EMAIL = p_Correo,
             ROL = CASE 
-                    WHEN p_IdRol != 0 THEN p_IdRol  
-                    ELSE ROL 
+                    WHEN p_IdRol != 0 THEN p_IdRol
+                    ELSE ROL
                   END
-        WHERE USER_ID = p_Identificacion;
-    END IF;
-    
-    
-    COMMIT;
-END FIDE_ActualizarPerfil_SP;
+        WHERE GLOBAL_ID = p_Identificacion;
 
+        DBMS_OUTPUT.PUT_LINE('Se actualizó el usuario correctamente.');
+        COMMIT;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Error: Correo o cédula ya están en uso por otro usuario.');
+        RAISE_APPLICATION_ERROR(-20001, 'Correo o cédula ya están registrados por otro usuario.');
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('--- FIN DE PROCEDIMIENTO ---');
+END FIDE_ActualizarPerfil_SP;
 PROCEDURE FIDE_ConsultarUsuario_SP(
 	p_Identificacion NUMBER,
     p_Result OUT SYS_REFCURSOR   
